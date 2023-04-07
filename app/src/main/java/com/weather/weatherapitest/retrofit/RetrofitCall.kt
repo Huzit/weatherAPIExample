@@ -23,7 +23,7 @@ class RetrofitCall {
         provideWeatherApi = rtBuilder.create(WeatherApi::class.java)
     }
 
-    suspend fun getWeather(dataType: String, numOfRows: Int, pageNo: Int, baseDate: Int, baseTime: Int, nx: String, ny: String) : Response<WeatherResponse>{
+    suspend fun getWeather(dataType: String, numOfRows: Int, pageNo: Int, baseDate: String, baseTime: String, nx: String, ny: String) : Response<WeatherResponse>{
         return provideWeatherApi.getWeather(dataType, numOfRows, pageNo, baseDate, baseTime, nx, ny)
     }
 }

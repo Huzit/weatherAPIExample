@@ -17,18 +17,21 @@ class WeatherViewModel() : ViewModel() {
 
     fun getWeather(
         dataType: String, numOfRows: Int, pageNo: Int,
-        baseDate: Int, baseTime: Int, nx: String, ny: String
+        baseDate: String, baseTime: String, nx: String, ny: String
     ) {
         viewModelScope.launch {
-            val response =
-                repository.getWeather(dataType, numOfRows, pageNo, baseDate, baseTime, nx, ny)
-            if(response.isSuccessful) {
-                Log.d("성", "공")
-                _weatherResponseResponse.value = response
-                _weatherResponseResponse = MutableLiveData<Response<WeatherResponse>>()
+            try {
+                val response =
+                    repository.getWeather(dataType, numOfRows, pageNo, baseDate, baseTime, nx, ny)
+                if (response.isSuccessful) {
+                    Log.d("성공", response.message())
+                    _weatherResponseResponse.value = response
+                    _weatherResponseResponse = MutableLiveData<Response<WeatherResponse>>()
+                } else
+                    Log.d("에러", response.message())
+            } catch (e: java.lang.NullPointerException){
+                Log.e(javaClass.simpleName, "현재 시간의 기상정보를 찾을 수 없습니다. 시간을 다시 확인해주세요")
             }
-            else
-                Log.d("dㅔ러", response.message())
         }
     }
 }

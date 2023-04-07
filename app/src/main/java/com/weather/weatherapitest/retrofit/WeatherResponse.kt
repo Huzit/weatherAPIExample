@@ -29,7 +29,7 @@ data class WeatherResponse(val response: Response) {
         val baseTime: Int,
         val category: String,
         val fcstDate: Int,
-        val fcstTime: Int,
+        val fcstTime: String,
         val fcstValue: String,
         val nx: Int,
         val ny: Int

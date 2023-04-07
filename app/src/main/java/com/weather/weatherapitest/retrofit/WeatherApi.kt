@@ -11,8 +11,8 @@ interface WeatherApi {
         @Query("dataType") dataType: String,
         @Query("numOfRows") numOfRows: Int,
         @Query("pageNo") pageNo: Int,
-        @Query("base_date") baseData: Int,
-        @Query("base_time") baseTime: Int,
+        @Query("base_date") baseData: String,
+        @Query("base_time") baseTime: String,
         @Query("nx") nx: String,
         @Query("ny") ny: String
     ) : Response<WeatherResponse>

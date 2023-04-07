@@ -44,16 +44,50 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
     }
 
+    /*
+    현재 분 단위가 30분 미만일 경우 직전 시간(-1) ~ 현재 시간의 기상 조회
+    현재 분 단위가 30분 이후일 경우 현재 시간 ~ 다음 시간(+1) 기상 조회
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     fun setWeatherView(){
         val now = LocalDateTime.now().toString()
-        val baseDate = now.split("T")[0].filter { it != '-' }.toInt()
-        val baseTime = (now.split("T")[1].substring(0..1) + "00").toInt()
+        var baseDate = now.split("T")[0].filter { it != '-' }
+        var baseTime = now.split("T")[1].substring(0..4).filter { it != ' ' && it != ':' }
+        var endTime = ""
         var nx = 0.0 //경도 x
         var ny = 0.0 //위도 y
-
         val locationManager = this.getSystemService(LocationManager::class.java)
         var location: Location?
+        val sb = StringBuilder()
+
+        //현재 분 단위가 30분 이전
+        if(baseTime.substring(2 .. 3).toInt() < 30){
+            //00:30 이전일 시 어제 날짜 23시로 변경
+            if(baseTime.substring(0..1) == "00") {
+                baseDate = LocalDateTime.now().minusDays(1L).toString().split("T")[0].filter { it != '-' }
+                baseTime = "2300"
+            }
+            //1시부터 23시사이 중 30분 이전일 경우
+            else{
+                sb.append(baseTime.substring(0..1))
+                //직전 시간
+                sb[1] = sb[1].minus(1)
+                //분 추가
+                sb.append("00")
+                baseTime = sb.toString()
+            }
+        }else {//이후
+            baseTime = baseTime.substring(0..1)+"00"
+        }
+
+        //검색 마지노 시간
+        if(baseTime == "2300") {
+            endTime = "0000"
+        } else{
+            sb.clear().append(baseTime)
+            sb[1] = sb[1].plus(1)
+            endTime = sb.toString()
+        }
 
         if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
@@ -65,14 +99,14 @@ class MainActivity : AppCompatActivity() {
             nx = 129.0
             ny = 35.0
         }
-        //todo 위도 경도를 그리드로 변경하기
+
         val grid = convertGRID_GPS(0, nx, ny)
-        Log.d("currentLocation", grid.first + " " + grid.second)
-        Log.d("기본 시간", "${baseDate} / $baseTime")
+//        Log.d("currentLocation", grid.first + " " + grid.second)
+        Log.d("기본 시간", "${baseDate} / $baseTime / $endTime")
 
         vm.getWeather("JSON", 60, 1, baseDate, baseTime, grid.first.toString(), grid.second.toString())
         vm.weatherResponse.observe(this){
-            for(i in it.body()!!.response.body.items.item.filter { it.fcstTime == baseTime + 100 })
+            for(i in it.body()!!.response.body.items.item.filter { it.fcstTime.toString() == endTime })
                 Log.d("weather is ", i.toString())
         }
     }
